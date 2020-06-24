@@ -5,8 +5,10 @@
 package it.polito.tdp.food;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import it.polito.tdp.food.model.Model;
+import it.polito.tdp.food.model.PorzioneAdiacente;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -40,7 +42,7 @@ public class FoodController {
     private Button btnCammino; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxPorzioni"
-    private ComboBox<?> boxPorzioni; // Value injected by FXMLLoader
+    private ComboBox<String> boxPorzioni; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
@@ -53,15 +55,33 @@ public class FoodController {
 
     @FXML
     void doCorrelate(ActionEvent event) {
-    	txtResult.clear();
-    	txtResult.appendText("Cerco porzioni correlate...");
-    	
+    	String porzione=boxPorzioni.getValue();
+    	if(porzione==null) {
+    		txtResult.appendText("ERRORE: Devi selezionare una porzione\n");
+    		return;
+    	}
+    	List<PorzioneAdiacente> adiacenti=model.getAdiacenti(porzione);
+    	for(PorzioneAdiacente p:adiacenti) {
+    		txtResult.appendText(String.format("%s %f\n", p.getPorzione(),p.getPeso()));
+    	}
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Creazione grafo...");
+    	Integer c=0;
+    	try {
+			String cString=txtCalorie.getText();
+			c=Integer.parseInt(cString);
+		} catch (NumberFormatException e) {
+			txtResult.appendText("ERRORE: Devi inserire un numero intero\n");
+			return;
+		}
+    	String messaggio=model.creaGrafo(c);
+    	txtResult.appendText(messaggio);
+    	
+    	boxPorzioni.getItems().clear();
+    	boxPorzioni.getItems().addAll(model.getVerticiGrafo());
     	
     }
 
